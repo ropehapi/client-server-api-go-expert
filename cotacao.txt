@@ -1,0 +1,2 @@
+Dólar: "4.8925"
+{"message":"Binary was compiled with 'CGO_ENABLED=0', go-sqlite3 requires cgo to work. This is a stub"}
