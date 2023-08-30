@@ -57,8 +57,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(bid)
 
-	//TODO: Continuar a partir daqui
-	db, err := sql.Open("sqlite3", "client_server_api_go_expert_db")
+	//Em tese, isso deve estar funcionando, mas nao tenho certeza
+	//pois não consegui testar devido a um erro de compilação do meu OS
+	db, err := sql.Open("sqlite3", "database.db")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		error := Error{Message: err.Error()}
@@ -67,10 +68,21 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	_, err = db.Exec("Insert into cotacao (data_hora, valor) values (1997-03-01, 5.40)")
+	stmt, err := db.Prepare("Insert into cotacao (valor, data) values ($1, $2)")
 	if err != nil {
 		error := Error{Message: err.Error()}
 		json.NewEncoder(w).Encode(error)
 		return
 	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(time.Now(), bid)
+	if err != nil {
+		error := Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
+		return
+	}
+
+	error := Error{Message: "Deu certo"}
+	json.NewEncoder(w).Encode(error)
 }
