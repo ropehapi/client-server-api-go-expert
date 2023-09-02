@@ -11,6 +11,9 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type Response struct {
+	Bid string `json:"bid"`
+}
 type Error struct {
 	Message string `json:"message"`
 }
@@ -21,7 +24,7 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 1000*time.Millisecond)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, "GET", "https://economia.awesomeapi.com.br/json/last/USD-BRL", nil)
@@ -49,17 +52,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := make(map[string]map[string]interface{})
+	response := make(map[string]map[string]string)
 	_ = json.Unmarshal(respInBytes, &response)
 
 	bid := response["USDBRL"]["bid"]
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(bid)
-
-	//Em tese, isso deve estar funcionando, mas nao tenho certeza
-	//pois não consegui testar devido a um erro de compilação do meu OS
-	db, err := sql.Open("sqlite3", "database.db")
+	db, err := sql.Open("sqlite3", "./cotacoes.db")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		error := Error{Message: err.Error()}
@@ -68,7 +66,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("Insert into cotacao (valor, data) values ($1, $2)")
+	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS cotacoes(valor REAL, data TEXT)")
+	if err != nil {
+		error := Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
+		return
+	}
+	stmt.Exec()
+
+	stmt, err = db.Prepare("Insert into cotacoes (valor, data) values ($1, $2)")
 	if err != nil {
 		error := Error{Message: err.Error()}
 		json.NewEncoder(w).Encode(error)
@@ -76,13 +82,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(time.Now(), bid)
+	_, err = stmt.Exec(bid, time.Now())
 	if err != nil {
 		error := Error{Message: err.Error()}
 		json.NewEncoder(w).Encode(error)
 		return
 	}
 
-	error := Error{Message: "Deu certo"}
-	json.NewEncoder(w).Encode(error)
+	apiResponse := Response{Bid: bid}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(apiResponse)
 }
