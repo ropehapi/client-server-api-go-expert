@@ -2,16 +2,16 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"log"
 	"net/http"
-	"encoding/json"
 	"os"
 	"time"
 )
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 900*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, "GET", "http://localhost:8080/cotacao", nil)
@@ -30,7 +30,7 @@ func main() {
 		log.Println(err.Error())
 	}
 	response := make(map[string]string)
-	_ = json .Unmarshal(bytes, &response)
+	_ = json.Unmarshal(bytes, &response)
 
 	bid := response["bid"]
 

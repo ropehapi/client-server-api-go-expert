@@ -24,7 +24,7 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithTimeout(context.Background(), 1000*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, "GET", "https://economia.awesomeapi.com.br/json/last/USD-BRL", nil)
@@ -74,7 +74,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	stmt.Exec()
 
-	stmt, err = db.Prepare("Insert into cotacoes (valor, data) values ($1, $2)")
+	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Millisecond)
+	defer cancel()
+
+	stmt, err = db.PrepareContext(ctx, "Insert into cotacoes (valor, data) values ($1, $2)")
 	if err != nil {
 		error := Error{Message: err.Error()}
 		json.NewEncoder(w).Encode(error)
