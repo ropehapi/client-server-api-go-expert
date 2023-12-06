@@ -19,3 +19,6 @@
 
 # Go workspace file
 go.work
+
+server/cotacoes.db
+client/cotacao.txt

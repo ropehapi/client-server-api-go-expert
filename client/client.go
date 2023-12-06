@@ -23,6 +23,11 @@ func main() {
 	if err != nil {
 		log.Println(err.Error())
 	}
+	
+	if res.StatusCode == 500 {
+		log.Println("Context deadline exceeded")
+		return
+	}
 
 	defer res.Body.Close()
 	bytes, err := io.ReadAll(res.Body)

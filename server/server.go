@@ -68,6 +68,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS cotacoes(valor REAL, data TEXT)")
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		error := Error{Message: err.Error()}
 		json.NewEncoder(w).Encode(error)
 		return
@@ -79,6 +80,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	stmt, err = db.PrepareContext(ctx, "Insert into cotacoes (valor, data) values ($1, $2)")
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		error := Error{Message: err.Error()}
 		json.NewEncoder(w).Encode(error)
 		return
@@ -87,6 +89,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	_, err = stmt.Exec(bid, time.Now())
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		error := Error{Message: err.Error()}
 		json.NewEncoder(w).Encode(error)
 		return
