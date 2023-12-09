@@ -26,4 +26,5 @@ O endpoint necessário gerado pelo server.go para este desafio será: /cotacao e
 Ao finalizar, envie o link do repositório para correção.
 
 ## Anotações
-Talves seja necessário rodar o comando `sudo apt-get install build-essential` para rodar o projeto.
+Talvez seja necessário rodar o comando `sudo apt-get install build-essential` para rodar o projeto.
+Talvez seja necessário rodar o comando `go env -w CGO_ENABLED=1` para rodar o projeto.

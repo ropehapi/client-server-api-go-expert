@@ -23,7 +23,7 @@ func main() {
 	if err != nil {
 		log.Println(err.Error())
 	}
-	
+
 	if res.StatusCode == 500 {
 		log.Println("Context deadline exceeded")
 		return
